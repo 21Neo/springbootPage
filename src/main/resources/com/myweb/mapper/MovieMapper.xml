@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.myweb.mapper.MovieMapper">
+
+    <resultMap id="result-movie" type="com.myweb.domain.Movie">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="price" column="price"/>
+        <result property="action_time" column="actionTime"/>
+    </resultMap>
+    
+    <select id="findByParam" resultMap="result-movie">
+        SELECT id,name,price,action_time from movie
+        <where>
+            1=1
+            <if test="name != null and name != ''">
+                and name like concat('%',concat(#{name},'%'))
+            </if>
+            <if test="beginTime != null and endTime != null">
+                and action_time BETWEEN #{beginTime} and #{endTime}
+            </if>
+        </where>
+    </select>
+
+</mapper>

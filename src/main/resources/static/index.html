@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>前端 Car</title>
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+ <!-- <link rel="stylesheet" href="../static/css/layer/2.4/skin/layer.css">-->
+</head>
+<body>
+<div class="container">
+  <h1>前端 Car</h1>
+  <div class="form-group">
+    <div class="input-group mb-3">
+      <input type="text" id="moviename" placeholder="剧名" name="moviename" class="form-control col-sm-2">
+      &nbsp;&nbsp;
+      <input type="date" id="sbeginTime" name="beginTime" class="form-control col-sm-2">
+      &nbsp;&nbsp;
+      <input type="date" id="sendTime" name="endTime" class="form-control col-sm-2">
+      &nbsp;&nbsp;
+      <input type="button" onclick="btnLogin()" class="btn btn-outline-success" value="&nbsp;&nbsp;查询&nbsp;&nbsp;">
+    </div>
+  </div>
+  <table class="table table-striped table-hover">
+    <thead>
+    <tr>
+      <th>剧名</th>
+      <th>价格</th>
+      <th>出厂日期</th>
+      <th>操作</th>
+    </tr>
+    </thead>
+    <tfoot>
+    <tr>
+      <th>车名</th>
+      <th>价格</th>
+      <th>出厂日期</th>
+      <th>操作</th>
+    </tr>
+    </tfoot>
+    <tbody>
+    </tbody>
+  </table>
+
+  <div class="form-group">
+    <label>剧名:</label>
+    <input id="id" type="hidden">
+    <input id="name" placeholder="剧名" class="form-control" type="text">
+    <small>*</small>
+  </div>
+  <div class="form-group">
+    <label>价格:</label>
+    <input id="price" placeholder="价格" class="form-control"
+           step="0.01" type="number">
+  </div>
+  <div class="form-group">
+    <label>上映时间:</label>
+    <input id="actionTime" class="form-control" type="date">
+  </div>
+
+  <button onclick="btnAdd()" class="btn btn-info btn-block" type="button">新增</button>
+  <button onclick="btnModify()" on class="btn btn-success btn-block" type="button">修改</button>
+  <br><br><br><br>
+</div>
+<script src="js/jquery-3.2.1.min.js"></script>
+<script>
+  // SPA: Single Page Application 单页应用程序
+
+  // 定义 url 常量
+  // const URL = "http://127.0.0.1:8086/api/"
+
+  // 当加载完网页内容,则显示数据
+
+  $(window).on('load',function () {
+     /* var formData = ({
+          "moviename":$("#moviename").val(),
+          "beginTime":$("#sbeginTime").val(),
+          "endTime":$("#sendTime").val()
+      })
+      console.log(formData)*/
+      // 查询所有数据
+      $("tbody").empty()
+      fetch()
+  })
+  $("#btnModify").attr("disabled", "");
+
+  function btnLogin() {
+      $("tbody").empty()
+      fetch()
+  }
+
+  // 查询数据
+  function fetch() {
+      var formData = ({
+          "moviename":$("#moviename").val(),
+          "beginTime":$("#sbeginTime").val(),
+          "endTime":$("#sendTime").val()
+      })
+      console.log(formData)
+      $.ajax({
+          url: "api/movies",
+          type: "get",
+          dataType: "json",
+          data:formData,
+          success: function (data) {
+              console.log(data)
+              $.each(data, (i, item) => {
+                  /*console.log(i, item, data[i])*/
+                  var text = `
+                    <tr id="${item.id}">
+                      <td>${item.name}</td>
+                      <td>${item.price}</td>
+                      <td>${item.actionTime}</td>
+                      <td>
+                        <button class="btn btn-primary"
+                          onclick="findByIdCar(${item.id})" type="button">修改</button>
+                        <button class="btn btn-danger"
+                          onclick="removeCar(${item.id},'${item.name}')" type="button">删除</button>
+                      </td>
+                    </tr>
+                  `
+                  $("tbody").append(text);
+              })
+          }
+      })
+  }
+
+  // 根据ID查询
+ function findByIdCar(id) {
+     console.log(id)
+     $.ajax({
+         type:'get',
+         url:"api/movies/"+id,
+         dataType:"json",
+         success:function (data){
+            $("#name").val(data.name)
+            $("#price").val(data.price)
+            $("#actionTime").val(data.actionTime)
+             $("#id").val(data.id)
+         }
+     })
+ }
+ 
+ // 修改 | 保存
+  function btnModify() {
+      var formData = ({
+          "name":$("#name").val(),
+          "price":$("#price").val(),
+          "actionTime":$("#actionTime").val(),
+          "id":$("#id").val()
+      })
+      console.log(formData)
+      edit(formData)
+  }
+
+  function edit(formData) {
+      $.ajax({
+          type:'post',
+          url:"api/movies",
+          dataType:"json",
+          data:formData,
+          success:function (data) {
+              // 刷新页面
+              if(data.code == 200){
+                  window.location.reload()
+              }
+          }
+      })
+  }
+
+  // 新增
+  function btnAdd() {
+      var formData = ({
+          "name":$("#name").val(),
+          "price":$("#price").val(),
+          "actionTime":$("#actionTime").val(),
+          "id":0
+      })
+      console.log(formData)
+      edit(formData)
+  }
+
+  // 删除
+  function removeCar(id,name) {
+    console.log("删除",id,name);
+    if(confirm("是否删除"+name+"?")){
+      $.ajax({
+        url:"api/movies/"+id,
+        type:"delete",
+          success:function (data) {
+            console.log(data)
+              if(data.code == 200){
+                  window.location.reload()
+              }
+          }
+      })
+    }
+  }
+
+</script>
+</body>
+</html>
